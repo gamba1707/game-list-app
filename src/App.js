@@ -1,5 +1,5 @@
-import React from 'react';
-import GameList from './GameList';
+import React from "react";
+import GameList from "./GameList";
 
 function App() {
   return (

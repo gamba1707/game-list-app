@@ -1,54 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import Tabletop from 'tabletop';
+import React, { useEffect, useState } from "react";
+import Papa from "papaparse";
 
-const SPREADSHEET_KEY = 'ここにスプレッドシートIDを貼る';
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwvo4rMvOgeRI6n5WRo8MP1Wbbyj9JT32Z5-l0O5U3N7f5mM2DQAQLkPvwNeeBOsty2Y5tPQ5Ir_9m/pub?gid=1073113726&single=true&output=csv";
 
 const GameList = () => {
   const [games, setGames] = useState([]);
-  const [filter, setFilter] = useState('All');
 
   useEffect(() => {
-    Tabletop.init({
-      key: SPREADSHEET_KEY,
-      simpleSheet: true,
-      callback: (data) => setGames(data),
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      complete: (results) => {
+        setGames(results.data);
+      },
     });
   }, []);
 
-  const platforms = ['All', ...new Set(games.map(game => game.platform))];
-  const filtered = filter === 'All' ? games : games.filter(g => g.platform === filter);
-
   return (
-    <div>
-      <h1>🎮 持っているゲーム一覧</h1>
-
-      {/* フィルター */}
-      <div style={{ margin: '1rem 0' }}>
-        <label>機種で絞り込み: </label>
-        <select value={filter} onChange={e => setFilter(e.target.value)}>
-          {platforms.map((p, idx) => (
-            <option key={idx} value={p}>{p}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* 一覧 */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-        {filtered.map((game, idx) => (
-          <div key={idx} style={{
-            border: '1px solid #ccc',
-            borderRadius: '10px',
-            padding: '1rem',
-            width: '200px',
-            textAlign: 'center'
-          }}>
-            <img src={game.image} alt={game.title} style={{ width: '100%' }} />
-            <h3>{game.title}</h3>
-            <p>{game.platform}</p>
-            <p>{game.releaseDate}</p>
-          </div>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">ゲーム一覧</h1>
+      <ul className="space-y-2">
+        {games.map((game, index) => (
+          <li key={index} className="bg-gray-100 p-4 rounded-xl shadow">
+            <p><strong>タイトル:</strong> {game.title}</p>
+            <p><strong>機種:</strong> {game.platform}</p>
+            <p><strong>発売日:</strong> {game.releaseDate}</p>
+            {game.image && (
+              <img src={game.image} alt={game.title} className="w-32 mt-2 rounded" />
+            )}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };
